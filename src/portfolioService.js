@@ -57,7 +57,7 @@ class PortfolioService {
           throw new Error(`No data available for symbol: ${portfolioStock.symbol}`);
         }
 
-        const { currentPrice, previousClose, change, changePercent } = stockData;
+        const { currentPrice, previousClose, change, changePercent, currency } = stockData;
         const quantity = portfolioStock.quantity;
 
         // Calculate values
@@ -75,7 +75,8 @@ class PortfolioService {
           changePercent,
           currentValue,
           previousValue,
-          valueChange
+          valueChange,
+          currency
         };
       });
 

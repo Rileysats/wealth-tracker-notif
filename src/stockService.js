@@ -26,6 +26,12 @@ class StockService {
     };
   }
 
+  async convertUSDtoAUD(value) {
+    const quote = await yahooFinance.quote('AUDUSD=X'); // USD to AUD is inverse
+    
+    return value * (1 / quote.regularMarketPrice);
+  }
+
   async getStockData(symbol) {
     try {
       if (this.useMockData) {
@@ -34,20 +40,36 @@ class StockService {
       }
 
       const quote = await yahooFinance.quote(symbol);
-      console.log('Waiting 6 seconds before next API call...');
-      await new Promise(resolve => setTimeout(resolve, 6000)); // 6-second delay
+      // console.log('Waiting 6 seconds before next API call...');
+      // await new Promise(resolve => setTimeout(resolve, 6000)); // 6-second delay
 
-      const currentPrice = quote.regularMarketPrice;
-      const previousClose = quote.regularMarketPreviousClose;
+      let currentPrice, previousClose;
+
+      if (symbol.endsWith(".AX")) {
+        currentPrice = quote.regularMarketPrice;
+        previousClose = quote.regularMarketPreviousClose;
+      }
+      else {
+        currentPrice = await this.convertUSDtoAUD(quote.regularMarketPrice)
+        previousClose = await this.convertUSDtoAUD(quote.regularMarketPreviousClose)
+      }
+
+      console.log(`${symbol}`)
+      console.log(quote.regularMarketPrice)
+      console.log(quote.regularMarketPreviousClose)
+      console.log(currentPrice)
+      console.log(previousClose)
+
       const change = quote.regularMarketChange;
       const changePercent = quote.regularMarketChangePercent;
+      
 
       return {
         symbol,
         currentPrice,
         previousClose,
         change,
-        changePercent
+        changePercent,
       };
     } catch (error) {
       console.error(`Error fetching stock data for ${symbol}:`, error.message);
