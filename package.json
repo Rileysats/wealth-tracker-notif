@@ -1,0 +1,30 @@
+{
+  "name": "wealth_tracker",
+  "version": "1.0.0",
+  "description": "A Node.js application that tracks your stock portfolio and sends daily SMS updates",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "run-now": "node index.js --run-now",
+    "deploy": "zip -r wealth-tracker.zip . -x \"*.git*\" -x \"node_modules/.bin/*\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "stocks",
+    "portfolio",
+    "sms",
+    "aws",
+    "finance"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "aws-sdk": "^2.1692.0",
+    "axios": "^1.9.0",
+    "dotenv": "^16.5.0",
+    "node-schedule": "^2.1.1",
+    "twilio": "^5.6.0",
+    "nodemailer": "^6.9.4",
+    "yahoo-finance2": "^2.6.0"
+  }
+}
