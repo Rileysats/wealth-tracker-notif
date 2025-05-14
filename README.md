@@ -69,7 +69,7 @@ TWILIO_PHONE_NUMBER=your_twilio_phone_number
 ### User Configuration
 
 ```env
-USER_PHONE_NUMBER=+61430151160
+USER_PHONE_NUMBER=user_phone_number
 ```
 
 ### Schedule Configuration
