@@ -34,6 +34,8 @@ class StockService {
       }
 
       const quote = await yahooFinance.quote(symbol);
+      console.log('Waiting 6 seconds before next API call...');
+      await new Promise(resolve => setTimeout(resolve, 6000)); // 6-second delay
 
       const currentPrice = quote.regularMarketPrice;
       const previousClose = quote.regularMarketPreviousClose;
@@ -62,8 +64,6 @@ class StockService {
         console.log(`${symbol}`)
         console.log(JSON.stringify(stockData));
         results.push(stockData);
-        console.log('Waiting 6 seconds before next API call...');
-        await new Promise(resolve => setTimeout(resolve, 6000)); // 6-second delay
       }
 
       return results;
