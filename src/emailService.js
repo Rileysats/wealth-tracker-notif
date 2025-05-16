@@ -61,12 +61,7 @@ class EmailService {
     let subject = `📊 Portfolio Update: ${formattedDate}`;
 
     // Create message header
-    // let htmlMessage = `📊 Portfolio Update: ${formattedDate}\n\n`;
     let htmlMessage = `<h2>📈 Daily Stock Summary</h2><hr>`;
-
-    // <h2 style="color:#2e6c80;">📈 Daily Stock Summary</h2>
-    // <p><strong>BHP:</strong> <span style="color:green;">+$1.42 (1.8%)</span></p>
-    // <p><strong>CSL:</strong> <span style="color:red;">-$0.76 (-0.4%)</span></p>
 
     // Add individual stock performance
     stocks.forEach(stock => {
@@ -81,13 +76,6 @@ class EmailService {
         <strong>Value:</strong> <span style="color:${color};">$${stock.currentValue.toFixed(2)} (${changeSign}$${stock.valueChange.toFixed(2)})</span></p>
       `;
 
-      // const changeSymbol = stock.valueChange >= 0 ? '📈' : '📉';
-      // const changeSign = stock.valueChange >= 0 ? '+' : '';
-      // const color = isUp ? 'green' : 'red';
-
-      // htmlMessage += `${changeSymbol} ${stock.symbol} (${stock.name}):\n`
-      // htmlMessage += `    $${stock.symbol}: $${stock.currentPrice.toFixed(2)} (${changeSign}${stock.changePercent.toFixed(2)}%)\n`;
-      // htmlMessage += `    Value: $${stock.currentValue.toFixed(2)} (${changeSign}$${stock.valueChange.toFixed(2)})\n\n`;
     });
 
     // Add total portfolio performance
@@ -102,13 +90,6 @@ class EmailService {
       <p><strong>Total Value:</strong> $${totalCurrentValue.toFixed(2)}<br>
       <strong>Daily Change:</strong> <span style="color:${totalColor};">${totalChangeSymbol} ${totalChangeSign}$${totalValueChange.toFixed(2)} (${totalChangeSign}${totalChangePercent.toFixed(2)}%)</span></p>
     `;
-
-    // Add total portfolio performance
-    // const totalChangeSymbol = totalValueChange >= 0 ? '📈' : '📉';
-    // const totalChangeSign = totalValueChange >= 0 ? '+' : '';
-
-    // htmlMessage += `📊 Total Portfolio Value: $${totalCurrentValue.toFixed(2)}\n`;
-    // htmlMessage += `${totalChangeSymbol} Daily Change: ${totalChangeSign}$${totalValueChange.toFixed(2)} (${totalChangeSign}${totalChangePercent.toFixed(2)}%)\n`;
 
     return {subject, htmlMessage};
   }
