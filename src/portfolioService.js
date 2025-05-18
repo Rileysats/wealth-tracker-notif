@@ -48,6 +48,7 @@ class PortfolioService {
 
       // Get stock data for all symbols
       const stockDataList = await stockService.getMultipleStockData(symbols);
+      const exchange_rate_usd_to_aud = await stockService.fetchExchangeRate()
 
       // Calculate performance for each stock
       const stocksPerformance = portfolio.stocks.map(portfolioStock => {
@@ -57,13 +58,28 @@ class PortfolioService {
           throw new Error(`No data available for symbol: ${portfolioStock.symbol}`);
         }
 
-        const { currentPrice, previousClose, change, changePercent, currency } = stockData;
+        let { currentPrice, previousClose, change, changePercent } = stockData;
         const quantity = portfolioStock.quantity;
+        const avg_buy_price = portfolioStock.avg_buy_price;
+        const initial_value = portfolioStock.initial_value;
 
         // Calculate values
-        const currentValue = currentPrice * quantity;
-        const previousValue = previousClose * quantity;
-        const valueChange = currentValue - previousValue;
+        let currentValue = currentPrice * quantity;
+        let previousValue = previousClose * quantity;
+        let valueChange = currentValue - previousValue;
+
+        let overallDiff = currentValue - portfolioStock.initial_value;
+        let overallChange = ((currentValue - portfolioStock.initial_value) / portfolioStock.initial_value) * 100;
+
+        if (!portfolioStock.symbol.endsWith(".AX")) {
+          currentPrice     *= exchange_rate_usd_to_aud;
+          previousClose    *= exchange_rate_usd_to_aud;
+          change           *= exchange_rate_usd_to_aud;
+          currentValue     *= exchange_rate_usd_to_aud;
+          previousValue    *= exchange_rate_usd_to_aud;
+          valueChange      *= exchange_rate_usd_to_aud;
+          overallDiff      *= exchange_rate_usd_to_aud;
+        }
 
         return {
           symbol: portfolioStock.symbol,
@@ -76,13 +92,19 @@ class PortfolioService {
           currentValue,
           previousValue,
           valueChange,
-          currency
+          overallDiff,
+          overallChange
         };
       });
 
       // Calculate total portfolio performance
       const totalCurrentValue = stocksPerformance.reduce((sum, stock) => sum + stock.currentValue, 0);
       const totalPreviousValue = stocksPerformance.reduce((sum, stock) => sum + stock.previousValue, 0);
+
+      const overallValueChange = stocksPerformance.reduce((sum, stock) => sum + stock.overallDiff, 0);
+      console.log("STOCK");
+      console.log(stocksPerformance);
+      console.log(overallValueChange);
       const totalValueChange = totalCurrentValue - totalPreviousValue;
       const totalChangePercent = (totalValueChange / totalPreviousValue) * 100;
 
@@ -91,6 +113,7 @@ class PortfolioService {
         totalCurrentValue,
         totalValueChange,
         totalChangePercent,
+        overallValueChange,
         date: new Date().toISOString()
       };
     } catch (error) {

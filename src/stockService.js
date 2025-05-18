@@ -1,3 +1,5 @@
+const { FSx } = require('aws-sdk');
+
 const yahooFinance = require('yahoo-finance2').default;
 yahooFinance.suppressNotices(['yahooSurvey'])
 require('dotenv').config();
@@ -5,6 +7,7 @@ require('dotenv').config();
 class StockService {
   constructor() {
     this.useMockData = process.env.USE_MOCK_DATA === 'true';
+    this.exchange_rate = null;
 
     if (this.useMockData) {
       console.log('Using mock data (Yahoo API not used).');
@@ -26,11 +29,22 @@ class StockService {
     };
   }
 
-  async convertUSDtoAUD(value) {
-    const quote = await yahooFinance.quote('AUDUSD=X'); // USD to AUD is inverse
-    
-    return value * (1 / quote.regularMarketPrice);
+  async fetchExchangeRate() {
+    if (!this.exchange_rate) {
+      const quote = await yahooFinance.quote('AUDUSD=X');
+      this.exchange_rate = 1 / quote.regularMarketPrice;
+      return Number(this.exchange_rate); // USD to AUD
+    }
+    else {
+      return Number(this.exchange_rate); // USD to AUD
+    }
   }
+
+  // async convertUSDtoAUD(value) {
+  //   const quote = await yahooFinance.quote('AUDUSD=X'); // USD to AUD is inverse
+    
+  //   return value * (1 / quote.regularMarketPrice);
+  // }
 
   async getStockData(symbol) {
     try {
@@ -43,22 +57,19 @@ class StockService {
       // console.log('Waiting 6 seconds before next API call...');
       // await new Promise(resolve => setTimeout(resolve, 6000)); // 6-second delay
 
-      let currentPrice, previousClose;
+      const currentPrice = quote.regularMarketPrice;
+      const previousClose = quote.regularMarketPreviousClose;
 
-      if (symbol.endsWith(".AX")) {
-        currentPrice = quote.regularMarketPrice;
-        previousClose = quote.regularMarketPreviousClose;
-      }
-      else {
-        currentPrice = await this.convertUSDtoAUD(quote.regularMarketPrice)
-        previousClose = await this.convertUSDtoAUD(quote.regularMarketPreviousClose)
-      }
+      // let currentPrice, previousClose;
 
-      console.log(`${symbol}`)
-      console.log(quote.regularMarketPrice)
-      console.log(quote.regularMarketPreviousClose)
-      console.log(currentPrice)
-      console.log(previousClose)
+      // if (symbol.endsWith(".AX")) {
+      //   currentPrice = quote.regularMarketPrice;
+      //   previousClose = quote.regularMarketPreviousClose;
+      // }
+      // else {
+      //   currentPrice = await this.convertUSDtoAUD(quote.regularMarketPrice)
+      //   previousClose = await this.convertUSDtoAUD(quote.regularMarketPreviousClose)
+      // }
 
       const change = quote.regularMarketChange;
       const changePercent = quote.regularMarketChangePercent;
@@ -92,6 +103,37 @@ class StockService {
     } catch (error) {
       console.error('Error fetching multiple stock data:', error.message);
       throw error;
+    }
+  }
+
+  async buyStock(ticker, quantity, price) {
+    try {
+      const data = await fs.readFile("portfolio.json", "utf8");
+      let jsonData = JSON.parse(data);
+      const stockToUpdate = jsonData.stocks.find(stock => stock.symbol === ticker);
+
+      if (!stockToUpdate) {
+        throw new Error(`Stock with symbol ${ticker} not found`)
+      }
+      const newQuantity = stockToUpdate.quantity + quantity
+      const newPrice = ((stockToUpdate.avg_buy_price * stockToUpdate.quantity) + (price * quantity)) / (newQuantity);
+      
+      stockToUpdate.avg_buy_price = newPrice;
+      stockToUpdate.quantity = newQuantity;
+
+      stockToUpdate.initial_value = stockToUpdate.quantity * stockToUpdate.avg_buy_price;
+
+      // Update lastUpdated timestamp
+      jsonData.lastUpdated = new Date().toISOString();
+
+      // Write back to JSON
+      await fs.writeFile("portfolio.json", JSON.stringify(jsonData, null, 2), "utf8");
+      console.log(`Successfully updated ${ticker}'s price to ${newPrice}`)
+      return true;
+
+    } catch (error) {
+      console.log(`Error: ${error.message}`);
+      return false;
     }
   }
 }
