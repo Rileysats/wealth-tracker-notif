@@ -7,7 +7,7 @@ require('dotenv').config();
 class StockService {
   constructor() {
     this.useMockData = process.env.USE_MOCK_DATA === 'true';
-    this.exchange_rate = null;
+    this.exchangeRates = {}; // { [fromCurrency]: rate }
 
     if (this.useMockData) {
       console.log('Using mock data (Yahoo API not used).');
@@ -29,22 +29,16 @@ class StockService {
     };
   }
 
-  async fetchExchangeRate() {
-    if (!this.exchange_rate) {
-      const quote = await yahooFinance.quote('AUDUSD=X');
-      this.exchange_rate = 1 / quote.regularMarketPrice;
-      return Number(this.exchange_rate); // USD to AUD
+  async fetchExchangeRate(fromCurrency) {
+    if (this.exchangeRates[fromCurrency]) {
+      return Number(this.exchangeRates[fromCurrency]);
     }
-    else {
-      return Number(this.exchange_rate); // USD to AUD
-    }
-  }
+    const quote = await yahooFinance.quote(`AUD${fromCurrency}=X`);
+    const rate = 1 / quote.regularMarketPrice;
+    this.exchangeRates[fromCurrency] = rate;
 
-  // async convertUSDtoAUD(value) {
-  //   const quote = await yahooFinance.quote('AUDUSD=X'); // USD to AUD is inverse
-    
-  //   return value * (1 / quote.regularMarketPrice);
-  // }
+    return Number(rate);
+  }
 
   async getStockData(symbol) {
     try {
@@ -54,22 +48,9 @@ class StockService {
       }
 
       const quote = await yahooFinance.quote(symbol);
-      // console.log('Waiting 6 seconds before next API call...');
-      // await new Promise(resolve => setTimeout(resolve, 6000)); // 6-second delay
 
       const currentPrice = quote.regularMarketPrice;
       const previousClose = quote.regularMarketPreviousClose;
-
-      // let currentPrice, previousClose;
-
-      // if (symbol.endsWith(".AX")) {
-      //   currentPrice = quote.regularMarketPrice;
-      //   previousClose = quote.regularMarketPreviousClose;
-      // }
-      // else {
-      //   currentPrice = await this.convertUSDtoAUD(quote.regularMarketPrice)
-      //   previousClose = await this.convertUSDtoAUD(quote.regularMarketPreviousClose)
-      // }
 
       const change = quote.regularMarketChange;
       const changePercent = quote.regularMarketChangePercent;
@@ -81,6 +62,7 @@ class StockService {
         previousClose,
         change,
         changePercent,
+        currency
       };
     } catch (error) {
       console.error(`Error fetching stock data for ${symbol}:`, error.message);
