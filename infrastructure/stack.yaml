@@ -1,0 +1,40 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Lambda function with EventBridge trigger permissions
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  AccountID:
+    Type: String
+
+Resources:
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: LambdaExecutionRole
+      Policies:
+        - PolicyName: LambdaLoggingAndSES
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: logs:CreateLogGroup
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/wealth-tracker:*
+              - Effect: Allow
+                Action: ses:SendEmail
+                Resource: "*"
+
+  WealthTrackerLambdaFnc:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: wealth-tracker-test
+      Runtime: nodejs22.x
+      Handler: src/index.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 20
+      CodeUri: ../wealth-tracker
+      MemorySize: 200
