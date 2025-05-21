@@ -1,6 +1,8 @@
 import portfolioService from './portfolioService.js';
 import sesService from './SESService.js';
-import emailService from './emailService.js';
+// import emailService from './emailService.js';
+
+// import os from 'os';
 
 import { config } from 'dotenv';
 config(); // Load environment variables
@@ -17,9 +19,7 @@ async function sendPortfolioUpdate(emailer) {
     const performanceData = await portfolioService.getPortfolioPerformance();
 
     // Log performance data
-    console.log('Portfolio performance data:', JSON.stringify(performanceData, null, 2));
-
-    console.log(performanceData)
+    // console.log('Portfolio performance data:', JSON.stringify(performanceData, null, 2));
 
     // Send SES update
     const sesResult = await sesService.sendPerformanceUpdate(performanceData);

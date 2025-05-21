@@ -1,4 +1,8 @@
 const { FSx } = require('aws-sdk');
+const fs = require('fs/promises');
+// import * as fs from 'node:fs/promises';
+// import { promises as fs } from 'fs';
+
 
 const yahooFinance = require('yahoo-finance2').default;
 yahooFinance.suppressNotices(['yahooSurvey'])
@@ -19,13 +23,15 @@ class StockService {
     const previousClose = currentPrice * (1 + (Math.random() * 0.1 - 0.05));
     const change = currentPrice - previousClose;
     const changePercent = (change / previousClose) * 100;
+    const currency = "AUD";
 
     return {
       symbol,
       currentPrice,
       previousClose,
       change,
-      changePercent
+      changePercent,
+      currency
     };
   }
 
@@ -54,7 +60,7 @@ class StockService {
   async getStockData(symbol) {
     try {
       if (this.useMockData) {
-        console.log(`Generating mock data for ${symbol}`);
+
         return this.generateMockData(symbol);
       }
 
@@ -101,10 +107,13 @@ class StockService {
 
   async buyStock(ticker, quantity, price) {
     try {
-      const data = await fs.readFile("portfolio.json", "utf8");
+      const path = "src/portfolio.json";
+      const data = await fs.readFile(path, "utf8");
+      
       let jsonData = JSON.parse(data);
+      console.log("Parsed portfolio JSON")
       const stockToUpdate = jsonData.stocks.find(stock => stock.symbol === ticker);
-
+      console.log(`Updating stock: ${stockToUpdate}`)
       if (!stockToUpdate) {
         throw new Error(`Stock with symbol ${ticker} not found`)
       }
@@ -114,13 +123,11 @@ class StockService {
       stockToUpdate.avg_buy_price = newPrice;
       stockToUpdate.quantity = newQuantity;
 
-      stockToUpdate.initial_value = stockToUpdate.quantity * stockToUpdate.avg_buy_price;
-
       // Update lastUpdated timestamp
       jsonData.lastUpdated = new Date().toISOString();
 
       // Write back to JSON
-      await fs.writeFile("portfolio.json", JSON.stringify(jsonData, null, 2), "utf8");
+      await fs.writeFile(path, JSON.stringify(jsonData, null, 2), "utf8");
       console.log(`Successfully updated ${ticker}'s price to ${newPrice}`)
       return true;
 
