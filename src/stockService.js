@@ -29,6 +29,17 @@ class StockService {
     };
   }
 
+  // async fetchExchangeRate(fromCurrency) {
+  //   if (!this.exchange_rate) {
+  //     const quote = await yahooFinance.quote(AUD${fromCurrency}=X);
+  //     this.exchange_rate = 1 / quote.regularMarketPrice;
+  //     return Number(this.exchange_rate);
+  //   }
+  //   else {
+  //     return Number(this.exchange_rate);
+  //   }
+  // }
+
   async fetchExchangeRate(fromCurrency) {
     if (this.exchangeRates[fromCurrency]) {
       return Number(this.exchangeRates[fromCurrency]);
@@ -62,7 +73,7 @@ class StockService {
         previousClose,
         change,
         changePercent,
-        currency
+        currency: quote.currency
       };
     } catch (error) {
       console.error(`Error fetching stock data for ${symbol}:`, error.message);

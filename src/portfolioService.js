@@ -48,65 +48,71 @@ class PortfolioService {
 
       // Get stock data for all symbols
       const stockDataList = await stockService.getMultipleStockData(symbols);
-      const exchange_rate_usd_to_aud = await stockService.fetchExchangeRate()
+      // const exchange_rate_usd_to_aud = await stockService.fetchExchangeRate("USD")
 
       // Calculate performance for each stock
-      const stocksPerformance = portfolio.stocks.map(portfolioStock => {
-        const stockData = stockDataList.find(data => data.symbol === portfolioStock.symbol);
+      const stocksPerformance = await Promise.all(
+        portfolio.stocks.map(async portfolioStock => {
 
-        if (!stockData) {
-          throw new Error(`No data available for symbol: ${portfolioStock.symbol}`);
-        }
+        // for (const portfolioStock of portfolio.stocks) {
+          const stockData = stockDataList.find(data => data.symbol === portfolioStock.symbol);
 
-        let { currentPrice, previousClose, change, changePercent } = stockData;
-        const quantity = portfolioStock.quantity;
-        const avg_buy_price = portfolioStock.avg_buy_price;
-        const initial_value = portfolioStock.initial_value;
+          if (!stockData) {
+            throw new Error(`No data available for symbol: ${portfolioStock.symbol}`);
+          }
 
-        // Calculate values
-        let currentValue = currentPrice * quantity;
-        let previousValue = previousClose * quantity;
-        let valueChange = currentValue - previousValue;
+          let { currentPrice, previousClose, change, changePercent, currency } = stockData;
 
-        let overallDiff = currentValue - portfolioStock.initial_value;
-        let overallChange = ((currentValue - portfolioStock.initial_value) / portfolioStock.initial_value) * 100;
+          // Calculate values
+          let purchasePrice = portfolioStock.avg_buy_price * portfolioStock.quantity;
+          let currentValue = currentPrice * portfolioStock.quantity;
+          let previousValue = previousClose * portfolioStock.quantity;
+          let valueChange = currentValue - previousValue;
 
-        if (!portfolioStock.symbol.endsWith(".AX")) {
-          currentPrice     *= exchange_rate_usd_to_aud;
-          previousClose    *= exchange_rate_usd_to_aud;
-          change           *= exchange_rate_usd_to_aud;
-          currentValue     *= exchange_rate_usd_to_aud;
-          previousValue    *= exchange_rate_usd_to_aud;
-          valueChange      *= exchange_rate_usd_to_aud;
-          overallDiff      *= exchange_rate_usd_to_aud;
-        }
+          let overallDiff = currentValue - purchasePrice;
+          let overallChange = ((currentValue - purchasePrice) / purchasePrice) * 100;
 
-        return {
-          symbol: portfolioStock.symbol,
-          name: portfolioStock.name,
-          quantity,
-          currentPrice,
-          previousClose,
-          change,
-          changePercent,
-          currentValue,
-          previousValue,
-          valueChange,
-          overallDiff,
-          overallChange
-        };
-      });
+          if (currency !== "AUD") {
+            const exchange_rate_to_aud = await stockService.fetchExchangeRate(currency)
+            currentPrice     *= exchange_rate_to_aud;
+            previousClose    *= exchange_rate_to_aud;
+            change           *= exchange_rate_to_aud;
+            currentValue     *= exchange_rate_to_aud;
+            previousValue    *= exchange_rate_to_aud;
+            purchasePrice    *= exchange_rate_to_aud;
+            valueChange      *= exchange_rate_to_aud;
+            overallDiff      *= exchange_rate_to_aud;
+          }
+
+          return {
+            symbol: portfolioStock.symbol,
+            name: portfolioStock.name,
+            quantity: portfolioStock.quantity,
+            currentPrice,
+            previousClose,
+            change,
+            changePercent,
+            currentValue,
+            previousValue,
+            purchasePrice,
+            valueChange,
+            overallDiff,
+            overallChange
+          };
+        })
+      );
 
       // Calculate total portfolio performance
       const totalCurrentValue = stocksPerformance.reduce((sum, stock) => sum + stock.currentValue, 0);
       const totalPreviousValue = stocksPerformance.reduce((sum, stock) => sum + stock.previousValue, 0);
 
-      const overallValueChange = stocksPerformance.reduce((sum, stock) => sum + stock.overallDiff, 0);
-      console.log("STOCK");
-      console.log(stocksPerformance);
-      console.log(overallValueChange);
       const totalValueChange = totalCurrentValue - totalPreviousValue;
       const totalChangePercent = (totalValueChange / totalPreviousValue) * 100;
+
+      // Calculate overall portfolio performance
+      const overallValueChange = stocksPerformance.reduce((sum, stock) => sum + stock.overallDiff, 0);
+      const totalPurchaseValue = stocksPerformance.reduce((sum, stock) => sum + stock.purchasePrice, 0);
+      const overallChangePercent = (overallValueChange / totalPurchaseValue) * 100;
 
       return {
         stocks: stocksPerformance,
@@ -114,6 +120,7 @@ class PortfolioService {
         totalValueChange,
         totalChangePercent,
         overallValueChange,
+        overallChangePercent,
         date: new Date().toISOString()
       };
     } catch (error) {

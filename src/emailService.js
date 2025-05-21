@@ -18,7 +18,7 @@ class EmailService {
    * Initialize the Email client if valid credentials are provided
    */
   initializeEmailClient() {
-    // Check if we have valid Twilio credentials
+    // Check if we have valid email credentials
     if (
       !this.useMock && this.accountUser && 
       this.accountPassword && this.fromEmail && this.toEmail
