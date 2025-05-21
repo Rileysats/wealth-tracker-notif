@@ -3,7 +3,7 @@ const stockService = require('./stockService');
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 
-class SesService {
+class EmailService {
   constructor() {
     // gmail
     this.gmailUser = process.env.GMAIL_EMAIL;
@@ -188,4 +188,4 @@ class SesService {
   }
 }
 
-module.exports = new SesService();
+module.exports = new EmailService();

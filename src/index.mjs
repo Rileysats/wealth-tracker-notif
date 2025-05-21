@@ -1,5 +1,5 @@
 import portfolioService from './portfolioService.js';
-import sesService from './SESService.js';
+import emailService from './emailService.js';
 // import emailService from './emailService.js';
 
 // import os from 'os';
@@ -22,7 +22,7 @@ async function sendPortfolioUpdate(emailer) {
     // console.log('Portfolio performance data:', JSON.stringify(performanceData, null, 2));
 
     // Send SES update
-    const sesResult = await sesService.sendPerformanceUpdate(performanceData);
+    const sesResult = await emailService.sendPerformanceUpdate(performanceData);
     // const sesResult = await emailer.sendPerformanceUpdate(performanceData);
 
     console.log('Portfolio update process completed successfully.');
