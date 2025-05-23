@@ -38,6 +38,7 @@ temp/
 .vscode/
 *.swp
 *~
+.DS_Store
 
 # text files + app specific
 TODO.txt
