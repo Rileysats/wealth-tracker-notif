@@ -7,6 +7,13 @@ Resources:
     Type: AWS::IAM::Role
     Properties:
       RoleName: LambdaExecutionRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
       Policies:
         - PolicyName: LambdaLoggingAndSES
           PolicyDocument:
@@ -19,18 +26,36 @@ Resources:
                 Action:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
-                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/wealth-tracker:*
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/stock-tracker:*
               - Effect: Allow
                 Action: ses:SendEmail
                 Resource: "*"
 
-  WealthTrackerLambdaFnc:
+  StockTrackerLambdaFnc:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: wealth-tracker-test
+      FunctionName: stock-tracker
       Runtime: nodejs22.x
       Handler: src/index.handler
       Role: !GetAtt LambdaExecutionRole.Arn
       Timeout: 20
-      CodeUri: ../wealth-tracker.zip
+      CodeUri: ../stock-tracker.zip
       MemorySize: 200
+
+  # MyEventBridgeRule:
+  #   Type: AWS::Events::Rule
+  #   Properties:
+  #     Name: RunLambdaEveryHour
+  #     ScheduleExpression: rate(1 hour)  # or use cron(...)
+  #     State: ENABLED
+  #     Targets:
+  #       - Arn: !GetAtt MyLambdaFunction.Arn
+  #         Id: TargetLambda
+
+  # LambdaInvokePermission:
+  #   Type: AWS::Lambda::Permission
+  #   Properties:
+  #     FunctionName: !Ref MyLambdaFunction
+  #     Action: lambda:InvokeFunction
+  #     Principal: events.amazonaws.com
+  #     SourceArn: !GetAtt MyEventBridgeRule.Arn

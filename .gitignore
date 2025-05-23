@@ -8,7 +8,7 @@ yarn-error.log
 .env
 
 # AWS Lambda deployment package
-wealth-tracker.zip
+stock-tracker.zip
 
 # Logs
 logs/

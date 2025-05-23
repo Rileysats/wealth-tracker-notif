@@ -5,10 +5,10 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR/.."
 
-# zip -r wealth-tracker.zip src .env node_modules package.json package-lock.json
+zip -r stock-tracker.zip src .env node_modules package.json package-lock.json
 
 # Configuration
-STACK_NAME="wealth-tracker-stack"
+STACK_NAME="stock-tracker-stack"
 
 # Export AWS credentials
 source .env
@@ -25,19 +25,13 @@ aws cloudformation package \
 
 
 # Deploy the CloudFormation stack
-echo "Deploying CloudFormation stack..."
-# aws cloudformation deploy \
-#   --stack-name $STACK_NAME \
-#   --template-file infrastructure/stack.yaml \
-#   --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
+echo "Deploying CloudFormation stack: $STACK_NAME"
 aws cloudformation deploy \
   --template-file packaged.yaml \
   --stack-name $STACK_NAME \
   --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-# sam deploy \
-#   --stack-name "$STACK_NAME" \
-#   --template-file infrastructure/stack.yaml \
-#   --capabilities CAPABILITY_NAMED_IAM \
-#   --resolve-s3
+
+rm packaged.yaml
+
 
 

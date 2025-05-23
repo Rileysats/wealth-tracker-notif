@@ -1,4 +1,4 @@
-# Wealth Tracker
+# Stock Tracker
 
 A Node.js application that tracks your stock portfolio and sends daily SMS updates after the US stock market closes.
 
@@ -25,7 +25,7 @@ A Node.js application that tracks your stock portfolio and sends daily SMS updat
 
 ```bash
 git clone <repository-url>
-cd wealth_tracker
+cd stock_tracker
 ```
 
 2. Install dependencies:
@@ -133,7 +133,7 @@ This application can be deployed to AWS using Lambda and EventBridge for schedul
 3. Create a deployment package:
 
 ```bash
-zip -r wealth-tracker.zip .
+zip -r stock-tracker.zip .
 ```
 
 4. Upload the deployment package to your Lambda function

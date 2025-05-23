@@ -1,12 +1,12 @@
 {
-  "name": "wealth_tracker",
+  "name": "stock_tracker",
   "version": "1.0.0",
   "description": "A Node.js application that tracks your stock portfolio and sends daily SMS updates",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "run-now": "node index.js --run-now",
-    "deploy": "zip -r wealth-tracker.zip . -x \"*.git*\" -x \"node_modules/.bin/*\"",
+    "deploy": "zip -r stock-tracker.zip src .env node_modules package.json package-lock.json",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [

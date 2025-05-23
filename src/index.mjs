@@ -45,7 +45,7 @@ export async function handler(event) {
  * Local runner
  */
 async function run() {
-  console.log('Starting Wealth Tracker application...');
+  console.log('Starting Stock Tracker application...');
   const args = process.argv.slice(2);
   const runNow = args.includes('--run-now');
 
