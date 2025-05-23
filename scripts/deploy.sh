@@ -31,6 +31,4 @@ aws cloudformation deploy \
   --stack-name $STACK_NAME \
   --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 
-rm packaged.yaml
-rm stock-tracker.zip
-
+rm packaged.yaml stock-tracker.zip
