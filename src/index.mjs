@@ -1,8 +1,5 @@
 import portfolioService from './portfolioService.js';
 import emailService from './emailService.js';
-// import emailService from './emailService.js';
-
-// import os from 'os';
 
 import { config } from 'dotenv';
 config(); // Load environment variables
@@ -23,7 +20,6 @@ async function sendPortfolioUpdate(emailer) {
 
     // Send SES update
     const sesResult = await emailService.sendPerformanceUpdate(performanceData);
-    // const sesResult = await emailer.sendPerformanceUpdate(performanceData);
 
     console.log('Portfolio update process completed successfully.');
     return { status: 'success', sesResult };
@@ -45,17 +41,8 @@ export async function handler(event) {
  * Local runner
  */
 async function run() {
-  console.log('Starting Stock Tracker application...');
-  const args = process.argv.slice(2);
-  const runNow = args.includes('--run-now');
-
-  if (runNow) {
-    console.log('Running portfolio update immediately...');
+  console.log('Starting Stock Tracker application in local mode');
     await sendPortfolioUpdate();
-  } else {
-    console.log('Setting up scheduled job...');
-    // Add schedule logic here if needed
-  }
 }
 
 

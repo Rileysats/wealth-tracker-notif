@@ -48,7 +48,6 @@ class PortfolioService {
 
       // Get stock data for all symbols
       const stockDataList = await stockService.getMultipleStockData(symbols);
-      // const exchange_rate_usd_to_aud = await stockService.fetchExchangeRate("USD")
 
       // Calculate performance for each stock
       const stocksPerformance = await Promise.all(

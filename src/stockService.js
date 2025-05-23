@@ -1,8 +1,5 @@
 const { FSx } = require('aws-sdk');
 const fs = require('fs/promises');
-// import * as fs from 'node:fs/promises';
-// import { promises as fs } from 'fs';
-
 
 const yahooFinance = require('yahoo-finance2').default;
 yahooFinance.suppressNotices(['yahooSurvey'])
@@ -34,17 +31,6 @@ class StockService {
       currency
     };
   }
-
-  // async fetchExchangeRate(fromCurrency) {
-  //   if (!this.exchange_rate) {
-  //     const quote = await yahooFinance.quote(AUD${fromCurrency}=X);
-  //     this.exchange_rate = 1 / quote.regularMarketPrice;
-  //     return Number(this.exchange_rate);
-  //   }
-  //   else {
-  //     return Number(this.exchange_rate);
-  //   }
-  // }
 
   async fetchExchangeRate(fromCurrency) {
     if (this.exchangeRates[fromCurrency]) {

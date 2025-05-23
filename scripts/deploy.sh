@@ -32,6 +32,5 @@ aws cloudformation deploy \
   --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 
 rm packaged.yaml
-
-
+rm stock-tracker.zip
 

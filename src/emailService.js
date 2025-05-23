@@ -15,7 +15,6 @@ class EmailService {
     this.toEmail = process.env.USER_EMAIL;
     this.useMock = process.env.USE_MOCK_EMAIL === "true";
 
-    // this.isLambda = !!process.env.AWS_LAMBDA_FUNCTION_NAME;
     this.isLocal = !Boolean(process.env.AWS_LAMBDA_FUNCTION_NAME);
 
     this.ses = null;
@@ -50,19 +49,6 @@ class EmailService {
       console.log('Mock mode enabled. Email will be simulated.');
       this.useMock = true;
     }
-
-
-    // if (!this.useMock && this.fromEmail && this.toEmail) {
-    //   try {
-    //     this.ses = new SESClient({ region: process.env.AWS_REGION || 'us-east-1' });
-    //     console.log('SES client initialized successfully');
-    //   } catch (error) {
-    //     console.error('Error initializing SES client:', error.message);
-    //     this.ses = null;
-    //   }
-    // } else {
-    //   console.log('Email configuration missing or mock mode enabled. Email will be simulated.');
-    // }
   }
 
   async formatPerformanceMessage(performanceData) {
@@ -80,7 +66,6 @@ class EmailService {
     let htmlMessage = `<h2>📈 Daily Stock Summary</h2><hr>`;
 
     // const stocksPerformance = portfolio.stocks.map(portfolioStock =>
-
     for (const stock of stocks) {
       let currentPrice, currentValue, overallDiff;
 
