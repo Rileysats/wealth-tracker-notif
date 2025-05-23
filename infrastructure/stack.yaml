@@ -41,21 +41,11 @@ Resources:
       Timeout: 20
       CodeUri: ../stock-tracker.zip
       MemorySize: 200
-
-  # MyEventBridgeRule:
-  #   Type: AWS::Events::Rule
-  #   Properties:
-  #     Name: RunLambdaEveryHour
-  #     ScheduleExpression: rate(1 hour)  # or use cron(...)
-  #     State: ENABLED
-  #     Targets:
-  #       - Arn: !GetAtt MyLambdaFunction.Arn
-  #         Id: TargetLambda
-
-  # LambdaInvokePermission:
-  #   Type: AWS::Lambda::Permission
-  #   Properties:
-  #     FunctionName: !Ref MyLambdaFunction
-  #     Action: lambda:InvokeFunction
-  #     Principal: events.amazonaws.com
-  #     SourceArn: !GetAtt MyEventBridgeRule.Arn
+      Events:
+        ScheduledEvent:
+          Type: Schedule
+          Properties:
+            Schedule: cron(10 6 ? * TUE-SAT *)
+            Name: StockTrackerSchedule
+            Description: "Trigger stock-tracker function Tuesday to Saturday at 6:10 AEST"
+            Enabled: true
