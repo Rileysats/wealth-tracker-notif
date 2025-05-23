@@ -15,23 +15,9 @@ class PortfolioService {
     try {
       const data = await fs.readFile(this.portfolioPath, 'utf8');
       return JSON.parse(data);
+
     } catch (error) {
       console.error('Error reading portfolio data:', error.message);
-      throw error;
-    }
-  }
-
-  /**
-   * Update the portfolio data in the JSON file
-   * @param {Object} portfolioData - Portfolio data to save
-   * @returns {Promise<void>}
-   */
-  async updatePortfolio(portfolioData) {
-    try {
-      const data = JSON.stringify(portfolioData, null, 2);
-      await fs.writeFile(this.portfolioPath, data, 'utf8');
-    } catch (error) {
-      console.error('Error updating portfolio data:', error.message);
       throw error;
     }
   }
