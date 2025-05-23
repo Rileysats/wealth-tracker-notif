@@ -2,10 +2,6 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: Lambda function with EventBridge trigger permissions
 Transform: AWS::Serverless-2016-10-31
 
-Parameters:
-  AccountID:
-    Type: String
-
 Resources:
   LambdaExecutionRole:
     Type: AWS::IAM::Role
@@ -36,5 +32,5 @@ Resources:
       Handler: src/index.handler
       Role: !GetAtt LambdaExecutionRole.Arn
       Timeout: 20
-      CodeUri: ../wealth-tracker
+      CodeUri: ../wealth-tracker.zip
       MemorySize: 200
