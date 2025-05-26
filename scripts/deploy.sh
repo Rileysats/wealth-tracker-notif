@@ -29,6 +29,8 @@ echo "Deploying CloudFormation stack: $STACK_NAME"
 aws cloudformation deploy \
   --template-file packaged.yaml \
   --stack-name $STACK_NAME \
-  --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+  --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
+  --parameter-overrides \
+    CronSchedule="$CRON_SCHEDULE"
 
 rm packaged.yaml stock-tracker.zip

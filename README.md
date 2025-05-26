@@ -4,19 +4,18 @@ A Node.js application that tracks your stock portfolio and sends daily SMS updat
 
 ## Features
 
-- Retrieves real-time stock data using Alpha Vantage API  
-- Calculates individual stock gains/losses  
+- Retrieves real-time stock data using yahoo-finance2
+- Calculates individual stock gains/losses 
 - Calculates total portfolio performance  
-- Sends formatted SMS updates via Twilio  
-- Runs automatically on a schedule (after US market close in AEST timezone)  
+- Sends formatted emails updates via SES/nodemailer  
+- Runs automatically on a schedule (after US market close in AEST timezone - 6:10am)  
 - Configurable via environment variables  
 
 ## Prerequisites
 
 - Node.js (v12 or higher)  
 - npm  
-- Alpha Vantage API key (free tier available)  
-- Twilio account (free trial available)  
+- yahoo-finance2 (unofficial API)  
 - AWS account (for deployment)  
 
 ## Installation
@@ -44,12 +43,6 @@ cp .env.example .env
 
 Edit the `.env` file with your specific configuration:
 
-### API Keys
-
-```env
-ALPHA_VANTAGE_API_KEY=your_alpha_vantage_api_key
-```
-
 ### AWS Configuration
 
 ```env
@@ -58,18 +51,10 @@ AWS_ACCESS_KEY_ID=your_aws_access_key
 AWS_SECRET_ACCESS_KEY=your_aws_secret_key
 ```
 
-### Twilio Configuration
-
-```env
-TWILIO_ACCOUNT_SID=your_twilio_account_sid
-TWILIO_AUTH_TOKEN=your_twilio_auth_token
-TWILIO_PHONE_NUMBER=your_twilio_phone_number
-```
-
 ### User Configuration
 
 ```env
-USER_PHONE_NUMBER=user_phone_number
+SES_EMAIL=approved_ses_email
 ```
 
 ### Schedule Configuration
@@ -90,12 +75,14 @@ Edit the `portfolio.json` file to include your stock holdings:
     {
       "symbol": "AAPL",
       "name": "Apple Inc.",
-      "quantity": 10
+      "quantity": 10,
+      "avg_buy_price": 110.00
     },
     {
       "symbol": "MSFT",
       "name": "Microsoft Corporation",
-      "quantity": 5
+      "quantity": 5,
+      "avg_buy_price": 200.00
     }
   ],
   "lastUpdated": "2025-05-13T00:00:00.000Z"
@@ -106,16 +93,10 @@ Edit the `portfolio.json` file to include your stock holdings:
 
 ### Running Locally
 
-To run the application locally with scheduling:
+To run the application locally with nodemailer:
 
 ```bash
 node index.js
-```
-
-To run the portfolio update immediately (without waiting for the schedule):
-
-```bash
-node index.js --run-now
 ```
 
 ### AWS Deployment
@@ -123,35 +104,35 @@ node index.js --run-now
 This application can be deployed to AWS using Lambda and EventBridge for scheduling.
 
 1. Create an AWS Lambda function:
-   - Runtime: Node.js 16.x  
-   - Handler: `index.handler`  
+   - Runtime: Node.js 22.x  
+   - Handler: `src/index.handler`  
    - Memory: 128 MB  
    - Timeout: 30 seconds  
 
 2. Add environment variables to the Lambda function (same as in your `.env` file)
 
-3. Create a deployment package:
+3. Run the deploy script:
 
 ```bash
-zip -r stock-tracker.zip .
+sh scripts/deploy.sh
 ```
 
-4. Upload the deployment package to your Lambda function
+Or
 
-5. Create an EventBridge rule to trigger the Lambda function:
-   - **Schedule expression**: `cron(0 8 ? * MON-FRI *)`
-   - **Target**: Your Lambda function
+```bash
+npm run deploy
+```
 
-6. Test the Lambda function using the AWS Console
+4. After successful deployment. Test the Lambda function using the AWS Console
 
 ## Architecture
 
 The application consists of the following components:
 
 - `index.js`: Main entry point and scheduler  
-- `stockService.js`: Handles stock data retrieval from Alpha Vantage API  
+- `stockService.js`: Handles stock data retrieval from yahoo-finance2 API  
 - `portfolioService.js`: Manages portfolio data and performance calculations  
-- `smsService.js`: Formats and sends SMS updates via Twilio  
+- `emailService.js`: Formats and sends emails updates via SES/nodemailer
 - `portfolio.json`: Stores user's stock holdings  
 
 ## License

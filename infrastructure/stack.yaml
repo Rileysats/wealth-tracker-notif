@@ -2,6 +2,11 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: Lambda function with EventBridge trigger permissions
 Transform: AWS::Serverless-2016-10-31
 
+Parameters:
+  CronSchedule:
+    Description: "Cron expression for the EventBridge rule to trigger the Lambda function"
+    Type: String
+
 Resources:
   LambdaExecutionRole:
     Type: AWS::IAM::Role
@@ -45,7 +50,7 @@ Resources:
         ScheduledEvent:
           Type: Schedule
           Properties:
-            Schedule: cron(10 6 ? * TUE-SAT *)
+            Schedule: !Ref CronSchedule
             Name: StockTrackerSchedule
             Description: "Trigger stock-tracker function Tuesday to Saturday at 6:10 AEST"
             Enabled: true

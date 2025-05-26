@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "run-now": "node index.js --run-now",
-    "deploy": "zip -r stock-tracker.zip src .env node_modules package.json package-lock.json",
+    "deploy": "sh scripts/deploy.sh",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
