@@ -45,7 +45,7 @@ Resources:
         ScheduledEvent:
           Type: Schedule
           Properties:
-            Schedule: cron(10 6 ? * TUE-SAT *)
+            Schedule: cron(10 20 ? * MON-FRI *) # Adjusted to UTC - 6:10 AEST
             Name: StockTrackerSchedule
             Description: "Trigger stock-tracker function Tuesday to Saturday at 6:10 AEST"
             Enabled: true

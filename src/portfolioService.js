@@ -5,6 +5,7 @@ const stockService = require('./stockService');
 class PortfolioService {
   constructor() {
     this.portfolioPath = path.join(__dirname, 'portfolio.json');
+    this.currency = process.env.CURRENCY || 'AUD';
   }
 
   /**
@@ -20,6 +21,42 @@ class PortfolioService {
       console.error('Error reading portfolio data:', error.message);
       throw error;
     }
+  }
+
+  /**
+   * Calculate performance metrics for a single stock in the portfolio
+   * @param {Object} stockData - Latest stock data (price, change, etc.)
+   * @param {Object} portfolioStock - Portfolio stock details (symbol, quantity, avg_buy_price, etc.)
+   * @returns {Promise<Object>} - Calculated performance metrics for the stock
+   */
+  async calculateStockPerformance(stockData, portfolioStock) {
+    let { currentPrice, change, changePercent, currency } = stockData;
+
+    // Calculate values
+    let purchasePrice = portfolioStock.avg_buy_price * portfolioStock.quantity;
+    let currentValue = currentPrice * portfolioStock.quantity;
+    let overallDiff = currentValue - purchasePrice;
+    let overallChange = ((currentValue - purchasePrice) / purchasePrice) * 100;
+
+    if (currency !== this.currency) {
+      const exchange_rate_to_aud = await stockService.fetchExchangeRate(currency)
+      currentPrice     *= exchange_rate_to_aud;
+      change           *= exchange_rate_to_aud;
+      currentValue     *= exchange_rate_to_aud;
+      overallDiff      *= exchange_rate_to_aud;
+    }
+
+    return {
+      symbol: portfolioStock.symbol,
+      name: portfolioStock.name,
+      quantity: portfolioStock.quantity,
+      currentPrice,
+      change,
+      changePercent,
+      currentValue,
+      overallDiff,
+      overallChange
+    };
   }
 
   /**
@@ -39,51 +76,15 @@ class PortfolioService {
       const stocksPerformance = await Promise.all(
         portfolio.stocks.map(async portfolioStock => {
 
-        // for (const portfolioStock of portfolio.stocks) {
           const stockData = stockDataList.find(data => data.symbol === portfolioStock.symbol);
 
           if (!stockData) {
             throw new Error(`No data available for symbol: ${portfolioStock.symbol}`);
           }
 
-          let { currentPrice, previousClose, change, changePercent, currency } = stockData;
+          const performanceMetrics = this.calculateStockPerformance(stockData, portfolioStock)
 
-          // Calculate values
-          let purchasePrice = portfolioStock.avg_buy_price * portfolioStock.quantity;
-          let currentValue = currentPrice * portfolioStock.quantity;
-          let previousValue = previousClose * portfolioStock.quantity;
-          let valueChange = currentValue - previousValue;
-
-          let overallDiff = currentValue - purchasePrice;
-          let overallChange = ((currentValue - purchasePrice) / purchasePrice) * 100;
-
-          if (currency !== "AUD") {
-            const exchange_rate_to_aud = await stockService.fetchExchangeRate(currency)
-            currentPrice     *= exchange_rate_to_aud;
-            previousClose    *= exchange_rate_to_aud;
-            change           *= exchange_rate_to_aud;
-            currentValue     *= exchange_rate_to_aud;
-            previousValue    *= exchange_rate_to_aud;
-            purchasePrice    *= exchange_rate_to_aud;
-            valueChange      *= exchange_rate_to_aud;
-            overallDiff      *= exchange_rate_to_aud;
-          }
-
-          return {
-            symbol: portfolioStock.symbol,
-            name: portfolioStock.name,
-            quantity: portfolioStock.quantity,
-            currentPrice,
-            previousClose,
-            change,
-            changePercent,
-            currentValue,
-            previousValue,
-            purchasePrice,
-            valueChange,
-            overallDiff,
-            overallChange
-          };
+          return performanceMetrics
         })
       );
 
