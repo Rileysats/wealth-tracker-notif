@@ -120,7 +120,7 @@ sh scripts/deploy.sh
 Or
 
 ```bash
-node deploy
+npm run deploy
 ```
 
 4. After successful deployment. Test the Lambda function using the AWS Console
