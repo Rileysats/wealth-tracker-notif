@@ -54,7 +54,7 @@ AWS_SECRET_ACCESS_KEY=your_aws_secret_key
 ### User Configuration
 
 ```env
-SES_EMAIL=approve_ses_email
+SES_EMAIL=approved_ses_email
 ```
 
 ### Schedule Configuration
