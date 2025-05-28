@@ -30,7 +30,7 @@ class PortfolioService {
    * @returns {Promise<Object>} - Calculated performance metrics for the stock
    */
   async calculateStockPerformance(stockData, portfolioStock) {
-    let { currentPrice, previousClose, change, changePercent, currency } = stockData;
+    let { currentPrice, previousClose, change, changePercent, currency, name} = stockData;
 
     // Calculate values
     let purchasePrice = portfolioStock.avg_buy_price * portfolioStock.quantity;
@@ -53,7 +53,7 @@ class PortfolioService {
 
     return {
       symbol: portfolioStock.symbol,
-      name: portfolioStock.name,
+      name,
       quantity: portfolioStock.quantity,
       currentPrice,
       change,

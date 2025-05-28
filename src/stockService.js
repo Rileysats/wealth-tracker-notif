@@ -51,12 +51,15 @@ class StockService {
       }
 
       const quote = await yahooFinance.quote(symbol);
+      // console.log(`Fetched data for ${symbol}:`, JSON.stringify(quote, null, 2));
 
       const currentPrice = quote.regularMarketPrice;
       const previousClose = quote.regularMarketPreviousClose;
 
       const change = quote.regularMarketChange;
       const changePercent = quote.regularMarketChangePercent;
+
+      const name = quote.longName || quote.shortName || symbol; // Fallback to symbol if longName is not available
       
 
       return {
@@ -65,7 +68,8 @@ class StockService {
         previousClose,
         change,
         changePercent,
-        currency: quote.currency
+        currency: quote.currency,
+        name
       };
     } catch (error) {
       console.error(`Error fetching stock data for ${symbol}:`, error.message);

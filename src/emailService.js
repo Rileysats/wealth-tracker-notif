@@ -114,6 +114,15 @@ class EmailService {
       <strong>Overall Change:</strong> <span style="color:${overallColor};">${overallChangeSymbol} ${overallChangeSign}$${overallValueChange.toFixed(2)} (${totalChangeSign}${overallChangePercent.toFixed(2)}%)</span>
       </p>   
     `;
+    
+    if (Object.keys(stockService.exchangeRates).length > 0) {
+      console.log(`Adding exchange rates to email message`)
+      htmlMessage += `<hr><h2>💱 Exchange Rates</h2>`;
+
+      Object.keys(stockService.exchangeRates).forEach(currency => {
+        htmlMessage += `<p><strong>${currency}->AUD:</strong> ${stockService.exchangeRates[currency]}</p>`;
+      });
+    }
 
     return { subject, htmlMessage };
   }
