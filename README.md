@@ -74,13 +74,11 @@ Edit the `portfolio.json` file to include your stock holdings:
   "stocks": [
     {
       "symbol": "AAPL",
-      "name": "Apple Inc.",
       "quantity": 10,
       "avg_buy_price": 110.00
     },
     {
       "symbol": "MSFT",
-      "name": "Microsoft Corporation",
       "quantity": 5,
       "avg_buy_price": 200.00
     }
