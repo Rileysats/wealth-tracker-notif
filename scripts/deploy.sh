@@ -20,7 +20,7 @@ export AWS_DEFAULT_REGION=$AWS_REGION
 echo "Packaging CloudFormation stack..."
 aws cloudformation package \
     --template-file infrastructure/stack.yaml \
-    --s3-bucket my-codebuild-artifacts-190244203197 \
+    --s3-bucket $AWS_ARTIFACT_BUCKET \
     --output-template-file packaged.yaml
 
 
