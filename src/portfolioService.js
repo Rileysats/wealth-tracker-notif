@@ -30,20 +30,25 @@ class PortfolioService {
    * @returns {Promise<Object>} - Calculated performance metrics for the stock
    */
   async calculateStockPerformance(stockData, portfolioStock) {
-    let { currentPrice, change, changePercent, currency } = stockData;
+    let { currentPrice, previousClose, change, changePercent, currency } = stockData;
 
     // Calculate values
     let purchasePrice = portfolioStock.avg_buy_price * portfolioStock.quantity;
     let currentValue = currentPrice * portfolioStock.quantity;
+    let previousValue = previousClose * portfolioStock.quantity;
     let overallDiff = currentValue - purchasePrice;
     let overallChange = ((currentValue - purchasePrice) / purchasePrice) * 100;
+    let dayChange = change * portfolioStock.quantity;
 
     if (currency !== this.currency) {
       const exchange_rate_to_aud = await stockService.fetchExchangeRate(currency)
       currentPrice     *= exchange_rate_to_aud;
       change           *= exchange_rate_to_aud;
+      dayChange        *= exchange_rate_to_aud;
       currentValue     *= exchange_rate_to_aud;
+      previousValue    *= exchange_rate_to_aud;
       overallDiff      *= exchange_rate_to_aud;
+      purchasePrice    *= exchange_rate_to_aud;
     }
 
     return {
@@ -53,9 +58,12 @@ class PortfolioService {
       currentPrice,
       change,
       changePercent,
+      dayChange,
       currentValue,
+      previousValue,
       overallDiff,
-      overallChange
+      overallChange,
+      purchasePrice
     };
   }
 
@@ -91,10 +99,10 @@ class PortfolioService {
       // Calculate total portfolio performance
       const totalCurrentValue = stocksPerformance.reduce((sum, stock) => sum + stock.currentValue, 0);
       const totalPreviousValue = stocksPerformance.reduce((sum, stock) => sum + stock.previousValue, 0);
-
+      
       const totalValueChange = totalCurrentValue - totalPreviousValue;
       const totalChangePercent = (totalValueChange / totalPreviousValue) * 100;
-
+      
       // Calculate overall portfolio performance
       const overallValueChange = stocksPerformance.reduce((sum, stock) => sum + stock.overallDiff, 0);
       const totalPurchaseValue = stocksPerformance.reduce((sum, stock) => sum + stock.purchasePrice, 0);

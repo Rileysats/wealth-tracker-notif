@@ -74,7 +74,7 @@ class EmailService {
       overallDiff = stock.overallDiff;
 
 
-      const isUp = stock.valueChange >= 0;
+      const isUp = stock.change >= 0;
       const changeSymbol = isUp ? '📈' : '📉';
       const changeSign = isUp ? '+' : '';
       const color = isUp ? 'green' : 'red';
@@ -89,7 +89,7 @@ class EmailService {
         <h3>${changeSymbol} ${stock.symbol} (${stock.name})</h3>
         <p>
         <strong>Price:</strong> <span style="color:${color};">$${currentPrice.toFixed(2)} (${changeSign}${stock.changePercent.toFixed(2)}%)</span><br>
-        <strong>Value:</strong> <span style="color:${color};">$${currentValue.toFixed(2)} (${changeSign}$${stock.change.toFixed(2)})</span><br>
+        <strong>Value:</strong> <span style="color:${color};">$${currentValue.toFixed(2)} (${changeSign}$${stock.dayChange.toFixed(2)})</span><br>
         <strong>Overall:</strong> <span style="color:${colorOverall};">$${overallDiff.toFixed(2)} (${changeSignOverall}${stock.overallChange.toFixed(2)}%)</span><br>
         <strong>Weighting:</strong>${stockWeighting.toFixed(2)}%
         </p>

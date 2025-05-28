@@ -43,3 +43,4 @@ temp/
 # text files + app specific
 TODO.txt
 portfolio.json
+packaged.yaml
