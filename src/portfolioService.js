@@ -1,11 +1,23 @@
 const fs = require('fs').promises;
 const path = require('path');
 const stockService = require('./stockService');
+const { S3Client, GetObjectCommand } = require('@aws-sdk/client-s3');
+const stream = require('stream');
+const { promisify } = require('util');
+
+
 
 class PortfolioService {
   constructor() {
     this.portfolioPath = path.join(__dirname, 'portfolio.json');
     this.currency = process.env.CURRENCY || 'AUD';
+
+    this.isLocal = !Boolean(process.env.AWS_LAMBDA_FUNCTION_NAME);
+
+    // S3 config (set these in your environment or config)
+    this.s3 = new S3Client({ region: process.env.AWS_REGION });
+    this.s3Bucket = process.env.AWS_DATA_BUCKET;
+    this.s3Key = process.env.S3_PORTFOLIO_KEY || 'stocks/portfolio.json';
   }
 
   /**
@@ -13,15 +25,75 @@ class PortfolioService {
    * @returns {Promise<Object>} - Portfolio data
    */
   async getPortfolio() {
-    try {
-      const data = await fs.readFile(this.portfolioPath, 'utf8');
-      return JSON.parse(data);
+    if (this.isLocal) {
+      try {
+        console.log('Local mode - Reading portfolio from file:', this.portfolioPath);
+        const data = await fs.readFile(this.portfolioPath, 'utf8');
+        return JSON.parse(data);
 
-    } catch (error) {
-      console.error('Error reading portfolio data:', error.message);
-      throw error;
+      } catch (error) {
+        console.error('Error reading portfolio data:', error.message);
+        throw error;
+      }
+    } else {
+      console.log('AWS Lambda mode - Reading portfolio from S3');
+      try {
+      const command = new GetObjectCommand({
+        Bucket: this.s3Bucket,
+        Key: this.s3Key,
+      });
+      const response = await this.s3.send(command);
+
+      // Convert stream to string
+      const pipeline = promisify(stream.pipeline);
+      let data = '';
+      await pipeline(
+        response.Body,
+        new stream.Writable({
+          write(chunk, encoding, callback) {
+            data += chunk.toString();
+            callback();
+          }
+        })
+      );
+      return JSON.parse(data);
+      } catch (error) {
+        console.error('Error reading portfolio data from S3:', error.message);
+        throw error;
+      }
     }
   }
+
+  /**
+   * Read the portfolio data from S3
+   * @returns {Promise<Object>} - Portfolio data
+   */
+  // async getPortfolioS3() {
+  //   try {
+  //     const command = new GetObjectCommand({
+  //       Bucket: this.s3Bucket,
+  //       Key: this.s3Key,
+  //     });
+  //     const response = await this.s3.send(command);
+
+  //     // Convert stream to string
+  //     const pipeline = promisify(stream.pipeline);
+  //     let data = '';
+  //     await pipeline(
+  //       response.Body,
+  //       new stream.Writable({
+  //         write(chunk, encoding, callback) {
+  //           data += chunk.toString();
+  //           callback();
+  //         }
+  //       })
+  //     );
+  //     return JSON.parse(data);
+  //   } catch (error) {
+  //     console.error('Error reading portfolio data from S3:', error.message);
+  //     throw error;
+  //   }
+  // }
 
   /**
    * Calculate performance metrics for a single stock in the portfolio

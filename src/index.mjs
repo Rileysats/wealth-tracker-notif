@@ -15,9 +15,6 @@ async function sendPortfolioUpdate(emailer) {
     console.log('Fetching portfolio performance data...');
     const performanceData = await portfolioService.getPortfolioPerformance();
 
-    // Log performance data
-    // console.log('Portfolio performance data:', JSON.stringify(performanceData, null, 2));
-
     // Send SES update
     const sesResult = await emailService.sendPerformanceUpdate(performanceData);
 
