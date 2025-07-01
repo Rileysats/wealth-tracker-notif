@@ -35,6 +35,12 @@ Resources:
               - Effect: Allow
                 Action: ses:SendEmail
                 Resource: "*"
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub arn:aws:s3:::stock-data-${AWS::AccountId}/*
 
   StockTrackerLambdaFnc:
     Type: AWS::Serverless::Function

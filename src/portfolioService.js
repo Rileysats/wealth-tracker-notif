@@ -1,11 +1,9 @@
 const fs = require('fs').promises;
 const path = require('path');
-const stockService = require('./stockService');
 const { S3Client, GetObjectCommand } = require('@aws-sdk/client-s3');
 const stream = require('stream');
+const stockService = require('./stockService');
 const { promisify } = require('util');
-
-
 
 class PortfolioService {
   constructor() {
