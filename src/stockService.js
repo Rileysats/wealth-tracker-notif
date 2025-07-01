@@ -108,9 +108,9 @@ class StockService {
         throw new Error(`Stock with symbol ${ticker} not found`)
       }
       const newQuantity = stockToUpdate.quantity + quantity
-      const newPrice = ((stockToUpdate.avg_buy_price * stockToUpdate.quantity) + (price * quantity)) / (newQuantity);
-      
-      stockToUpdate.avg_buy_price = newPrice;
+      const newPrice = ((stockToUpdate.averagePrice * stockToUpdate.quantity) + (price * quantity)) / (newQuantity);
+
+      stockToUpdate.averagePrice = newPrice;
       stockToUpdate.quantity = newQuantity;
 
       // Update lastUpdated timestamp

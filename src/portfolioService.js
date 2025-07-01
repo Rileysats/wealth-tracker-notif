@@ -96,14 +96,14 @@ class PortfolioService {
   /**
    * Calculate performance metrics for a single stock in the portfolio
    * @param {Object} stockData - Latest stock data (price, change, etc.)
-   * @param {Object} portfolioStock - Portfolio stock details (symbol, quantity, avg_buy_price, etc.)
+   * @param {Object} portfolioStock - Portfolio stock details (symbol, quantity, averagePrice, etc.)
    * @returns {Promise<Object>} - Calculated performance metrics for the stock
    */
   async calculateStockPerformance(stockData, portfolioStock) {
     let { currentPrice, previousClose, change, changePercent, currency, name} = stockData;
 
     // Calculate values
-    let purchasePrice = portfolioStock.avg_buy_price * portfolioStock.quantity;
+    let purchasePrice = portfolioStock.averagePrice * portfolioStock.quantity;
     let currentValue = currentPrice * portfolioStock.quantity;
     let previousValue = previousClose * portfolioStock.quantity;
     let overallDiff = currentValue - purchasePrice;
