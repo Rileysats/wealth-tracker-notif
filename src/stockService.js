@@ -1,7 +1,7 @@
-const { FSx } = require('aws-sdk');
-const fs = require('fs/promises');
 
+const fs = require('fs/promises');
 const yahooFinance = require('yahoo-finance2').default;
+
 yahooFinance.suppressNotices(['yahooSurvey'])
 require('dotenv').config();
 

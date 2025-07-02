@@ -63,37 +63,6 @@ class PortfolioService {
   }
 
   /**
-   * Read the portfolio data from S3
-   * @returns {Promise<Object>} - Portfolio data
-   */
-  // async getPortfolioS3() {
-  //   try {
-  //     const command = new GetObjectCommand({
-  //       Bucket: this.s3Bucket,
-  //       Key: this.s3Key,
-  //     });
-  //     const response = await this.s3.send(command);
-
-  //     // Convert stream to string
-  //     const pipeline = promisify(stream.pipeline);
-  //     let data = '';
-  //     await pipeline(
-  //       response.Body,
-  //       new stream.Writable({
-  //         write(chunk, encoding, callback) {
-  //           data += chunk.toString();
-  //           callback();
-  //         }
-  //       })
-  //     );
-  //     return JSON.parse(data);
-  //   } catch (error) {
-  //     console.error('Error reading portfolio data from S3:', error.message);
-  //     throw error;
-  //   }
-  // }
-
-  /**
    * Calculate performance metrics for a single stock in the portfolio
    * @param {Object} stockData - Latest stock data (price, change, etc.)
    * @param {Object} portfolioStock - Portfolio stock details (symbol, quantity, averagePrice, etc.)
