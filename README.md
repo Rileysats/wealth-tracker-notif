@@ -1,60 +1,112 @@
-# Stock Tracker
+# Wealth Tracker Notif
 
-A Node.js application that tracks your stock portfolio and sends daily SMS updates after the US stock market closes.
+A Node.js application that tracks your stock portfolio, calculates performance, and sends daily email updates after the US stock market closes. Designed for both local use and AWS Lambda deployment.
+
+---
 
 ## Features
 
-- Retrieves real-time stock data using yahoo-finance2
-- Calculates individual stock gains/losses 
-- Calculates total portfolio performance  
-- Sends formatted emails updates via SES/nodemailer  
-- Runs automatically on a schedule (after US market close in AEST timezone - 6:10am)  
-- Configurable via environment variables  
+- Retrieves real-time stock data using [yahoo-finance2](https://github.com/gadicc/node-yahoo-finance2)
+- Calculates individual stock and total portfolio performance
+- Sends formatted email updates via AWS SES (production) or Gmail (local)
+- Supports both local file and S3-based portfolio storage
+- Runs automatically on a schedule (after US market close, AEST timezone)
+- Easily configurable via environment variables
+
+---
+
+## Folder Structure
+
+```
+wealth-tracker-notif/
+├── infrastructure/
+│   └── stack.yaml           # AWS SAM/CloudFormation template for Lambda & permissions
+├── src/
+│   ├── emailService.js      # Email formatting and sending (SES/nodemailer)
+│   ├── index.mjs            # Main entry point (Lambda handler & local runner)
+│   ├── portfolio.json       # (Local only) Example portfolio data
+│   ├── portfolioService.js  # Portfolio data access & performance calculations
+│   └── stockService.js      # Stock data retrieval and currency conversion
+└── README.md
+```
+
+---
 
 ## Prerequisites
 
-- Node.js (v12 or higher)  
-- npm  
-- yahoo-finance2 (unofficial API)  
-- AWS account (for deployment)  
+- Node.js (v12 or higher)
+- npm
+- AWS account (for deployment)
+- [yahoo-finance2](https://github.com/gadicc/node-yahoo-finance2) (installed via npm)
+
+---
 
 ## Installation
 
-1. Clone the repository:
+1. **Clone the repository:**
+   ```bash
+   git clone <repository-url>
+   cd wealth-tracker-notif
+   ```
 
-```bash
-git clone <repository-url>
-cd stock_tracker
-```
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-2. Install dependencies:
+3. **Configure environment variables:**
+   Copy `.env.example` to `.env` and fill in your details.
+   ```bash
+   cp .env.example .env
+   ```
 
-```bash
-npm install
-```
-
-3. Configure environment variables by copying the `.env.example` file to `.env` and filling in your details:
-
-```bash
-cp .env.example .env
-```
+---
 
 ## Configuration
 
-Edit the `.env` file with your specific configuration:
-
 ### AWS Configuration
 
+Set these in your `.env` file or as Lambda environment variables:
 ```env
 AWS_REGION=ap-southeast-2
 AWS_ACCESS_KEY_ID=your_aws_access_key
 AWS_SECRET_ACCESS_KEY=your_aws_secret_key
+AWS_DATA_BUCKET=your-s3-bucket-name
+S3_PORTFOLIO_KEY=stocks/portfolio.json   # (optional, defaults to this value)
 ```
 
-### User Configuration
+### Email Configuration
 
 ```env
-SES_EMAIL=approved_ses_email
+SES_EMAIL=your_verified_ses_email
+GMAIL_EMAIL=your_gmail_address           # (for local mode)
+GMAIL_PASSWORD=your_gmail_app_password   # (for local mode)
+USER_EMAIL=recipient_email_address
+USE_MOCK_EMAIL=false                     # Set to true to simulate emails
+```
+
+### Portfolio Configuration
+
+- **Local mode:** Edit `src/portfolio.json` with your holdings.
+- **AWS Lambda mode:** Upload your portfolio JSON to S3 at the path specified by `S3_PORTFOLIO_KEY`.
+
+Example portfolio JSON:
+```json
+{
+  "stocks": [
+    {
+      "symbol": "AAPL",
+      "quantity": 10,
+      "averagePrice": 110.00
+    },
+    {
+      "symbol": "MSFT",
+      "quantity": 5,
+      "averagePrice": 200.00
+    }
+  ],
+  "lastUpdated": "2025-05-13T00:00:00.000Z"
+}
 ```
 
 ### Schedule Configuration
@@ -62,77 +114,42 @@ SES_EMAIL=approved_ses_email
 ```env
 SCHEDULE_CRON=0 8 * * 1-5
 ```
+> This runs at 8:00 AM AEST (after US market close).
 
-> This is set to run at 8:00 AM AEST (after US market close).
-
-### Portfolio Configuration
-
-Edit the `portfolio.json` file to include your stock holdings:
-
-```json
-{
-  "stocks": [
-    {
-      "symbol": "AAPL",
-      "quantity": 10,
-      "avg_buy_price": 110.00
-    },
-    {
-      "symbol": "MSFT",
-      "quantity": 5,
-      "avg_buy_price": 200.00
-    }
-  ],
-  "lastUpdated": "2025-05-13T00:00:00.000Z"
-}
-```
+---
 
 ## Usage
 
 ### Running Locally
 
-To run the application locally with nodemailer:
-
+To run the application locally (uses Gmail for email):
 ```bash
-node index.js
+node src/index.mjs
 ```
 
 ### AWS Deployment
 
-This application can be deployed to AWS using Lambda and EventBridge for scheduling.
+1. **Build and package Lambda:**
+   - Zip your code and dependencies as `stock-tracker.zip`.
 
-1. Create an AWS Lambda function:
-   - Runtime: Node.js 22.x  
-   - Handler: `src/index.handler`  
-   - Memory: 128 MB  
-   - Timeout: 30 seconds  
+2. **Deploy using AWS SAM or CloudFormation:**
+   - Edit [`infrastructure/stack.yaml`](infrastructure/stack.yaml) for your schedule and bucket.
+   - Deploy the stack via AWS Console or CLI.
 
-2. Add environment variables to the Lambda function (same as in your `.env` file)
+3. **Set environment variables in Lambda** (see above).
 
-3. Run the deploy script:
+4. **Upload your portfolio JSON to S3** at the path specified by `S3_PORTFOLIO_KEY`.
 
-```bash
-sh scripts/deploy.sh
-```
-
-Or
-
-```bash
-npm run deploy
-```
-
-4. After successful deployment. Test the Lambda function using the AWS Console
+---
 
 ## Architecture
 
-The application consists of the following components:
+- [`src/index.mjs`](src/index.mjs): Main entry point, Lambda handler, and local runner.
+- [`src/portfolioService.js`](src/portfolioService.js): Loads portfolio data (from S3 or local file), calculates performance.
+- [`src/stockService.js`](src/stockService.js): Fetches stock prices and currency rates.
+- [`src/emailService.js`](src/emailService.js): Formats and sends emails (SES or Gmail).
+- [`infrastructure/stack.yaml`](infrastructure/stack.yaml): AWS Lambda, IAM, and EventBridge schedule.
 
-- `index.js`: Main entry point and scheduler  
-- `stockService.js`: Handles stock data retrieval from yahoo-finance2 API  
-- `portfolioService.js`: Manages portfolio data and performance calculations  
-- `emailService.js`: Formats and sends emails updates via SES/nodemailer
-- `portfolio.json`: Stores user's stock holdings  
+---
 
 ## License
-
-MIT
